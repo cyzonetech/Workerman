@@ -1,5 +1,5 @@
 {
-    "name": "workerman/workerman",
+    "name": "cyzonetech/workerman",
     "type": "library",
     "keywords": [
         "event-loop",

@@ -403,10 +403,10 @@ class Http
             return \setcookie($name, $value, $maxage, $path, $domain, $secure, $HTTPOnly);
         }
 
-        HttpCache::$cookie[] = 'Set-Cookie: ' . $name . '=' . rawurlencode($value)
-            . (empty($domain) ? '' : '; Domain=' . $domain)
-            . (empty($maxage) ? '' : '; Max-Age=' . $maxage)
-            . (empty($path) ? '' : '; Path=' . $path)
+        HttpCache::$cookie[] = 'Set-Cookie: ' . $name . '=' . ($value ? rawurlencode($value) : 'deleted')
+            . (empty($maxage) ? '' : '; Max-Age=' . ($maxage > time() ? $maxage : 0))
+            . (empty($path) ? '' : '; path=' . $path)
+            . (empty($domain) ? '' : '; domain=' . $domain)
             . (!$secure ? '' : '; Secure')
             . (!$HTTPOnly ? '' : '; HttpOnly');
 

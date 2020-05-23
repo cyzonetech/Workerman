@@ -216,7 +216,7 @@ class Http
         $GLOBALS['HTTP_RAW_REQUEST_DATA'] = $GLOBALS['HTTP_RAW_POST_DATA'] = $http_body;
 
         // QUERY_STRING
-        $_SERVER['QUERY_STRING'] = static::parseUrl($_SERVER['REQUEST_URI'], \PHP_URL_QUERY);
+        $_SERVER['QUERY_STRING'] = static::mbParseUrl($_SERVER['REQUEST_URI'], \PHP_URL_QUERY);
         if ($_SERVER['QUERY_STRING']) {
             // $GET
             \parse_str($_SERVER['QUERY_STRING'], $_GET);
@@ -246,30 +246,24 @@ class Http
         return $ret;
     }
 
-    protected static function parseUrl($url, $component = -1)
+    protected static function mbParseUrl($url, $component = -1)
     {
-        $map = [
-            PHP_URL_SCHEME => 'scheme',
-            PHP_URL_HOST => 'host',
-            PHP_URL_PORT => 'port',
-            PHP_URL_USER => 'user',
-            PHP_URL_PASS => 'pass',
-            PHP_URL_PATH => 'path',
-            PHP_URL_QUERY => 'query',
-            PHP_URL_FRAGMENT => 'fragment'
-        ];
-        $encodeUrl = preg_replace_callback('%[^:/@?&=#]+%usD', function ($matches) {
-            return urlencode($matches[0]);
+        $encodedUrl = \preg_replace_callback('%[^:/?#&=\.]+%usD', function ($matches) {
+            return \urlencode($matches[0]);
         }, $url);
-        $parts = parse_url($encodeUrl);
 
-        if ($parts === false) {
-            throw new \InvalidArgumentException('Malformed URL: ' . $url);
+        $components = \parse_url($encodedUrl, $component);
+
+        if (\is_array($components)) {
+            foreach ($components as &$part) {
+                if (\is_string($part)) {
+                    $part = \urldecode($part);
+                }
+            }
+        } elseif (\is_string($components)) {
+            $components = \urldecode($components);
         }
-        foreach ($parts as $name => $value) {
-            $parts[$name] = urldecode($value);
-        }
-        return $component == -1 ? $parts : $parts[$map[$component]];
+        return $components;
     }
 
     /**

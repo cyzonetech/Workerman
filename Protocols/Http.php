@@ -14,7 +14,6 @@
 namespace Workerman\Protocols;
 
 use Workerman\Connection\TcpConnection;
-use Workerman\Protocols\Websocket;
 use Workerman\Worker;
 
 /**
@@ -725,12 +724,17 @@ class Http
                                 \file_put_contents($file_temp_path, $boundary_value);
                             }
                             continue 2;
+                        } else {
+                            // Parse $_POST.
+                            if (\preg_match('/name="(.*?)"$/', $header_value, $match)) {
+                                $_POST[$match[1]] = $boundary_value;
+                            }
                         }
                         break;
                     case "content-type":
-                        if($is_form_files){
+                        if ($is_form_files) {
                             $_FILES[$file_form_name]['type'][] = \trim($header_value);
-                        }else{
+                        } else {
                             $_FILES[$file_form_name]['type'] = \trim($header_value);
                         }
                         break;
